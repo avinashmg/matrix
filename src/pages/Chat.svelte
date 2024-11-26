@@ -1,6 +1,7 @@
 <script>
   import showdown from "showdown";
   import IdCard from "../lib/IdCard.svelte";
+  import { onMount } from "svelte";
   let textinput = "";
   let messages = [];
   let character = {
@@ -67,36 +68,40 @@
 
     textinput = "";
     typing = true;
-    const response = await fetch("http://127.0.0.1:8080/chat/completions", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        stream: true,
-        temperature: 0.8,
-        messages: [...initial_messages, ...messages],
-        cache_prompt: true,
-        samplers: "dkypmxt",
-        dynatemp_range: 0,
-        dynatemp_exponent: 1,
-        top_k: 40,
-        top_p: 0.95,
-        min_p: 0.05,
-        typical_p: 1,
-        xtc_probability: 0,
-        xtc_threshold: 0.1,
-        repeat_last_n: 64,
-        repeat_penalty: 1,
-        presence_penalty: 0,
-        frequency_penalty: 0,
-        dry_multiplier: 0,
-        dry_base: 1.75,
-        dry_allowed_length: 2,
-        dry_penalty_last_n: -1,
-        max_tokens: -1,
-      }),
-    });
+    const response = await fetch(
+      "https://openrouter.ai/api/v1/chat/completions",
+      {
+        headers: {
+          Authorization: `Bearer ${import.meta.env.VITE_API_KEY}`,
+          "Content-Type": "application/json",
+        },
+        method: "POST",
+        body: JSON.stringify({
+          stream: true,
+          temperature: 0.8,
+          messages: [...initial_messages, ...messages],
+          cache_prompt: true,
+          samplers: "dkypmxt",
+          dynatemp_range: 0,
+          dynatemp_exponent: 1,
+          top_k: 40,
+          top_p: 0.95,
+          min_p: 0.05,
+          typical_p: 1,
+          xtc_probability: 0,
+          xtc_threshold: 0.1,
+          repeat_last_n: 64,
+          repeat_penalty: 1,
+          presence_penalty: 0,
+          frequency_penalty: 0,
+          dry_multiplier: 0,
+          dry_base: 1.75,
+          dry_allowed_length: 2,
+          dry_penalty_last_n: -1,
+          max_tokens: -1,
+        }),
+      }
+    );
 
     const reader = response.body.getReader();
     const decoder = new TextDecoder("utf-8");
