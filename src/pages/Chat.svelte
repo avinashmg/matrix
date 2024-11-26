@@ -260,4 +260,25 @@
   .chatinput button {
     height: 100px;
   }
+  @media (max-width: 600px) {
+    .leftsidebar {
+      display: none;
+    }
+    .flex-column {
+      left: 25px;
+      width: calc(100vw - 50px);
+    }
+    .chatinput {
+      width: calc(100vw - 20px);
+    }
+    .chatscreen {
+      width: calc(100%);
+    }
+    .topbar {
+      width: 100vw;
+    }
+    .chatinput textarea {
+      width: 100%;
+    }
+  }
 </style>
