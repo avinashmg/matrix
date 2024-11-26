@@ -77,6 +77,7 @@
         },
         method: "POST",
         body: JSON.stringify({
+          model: "nousresearch/hermes-3-llama-3.1-405b:free",
           stream: true,
           temperature: 0.8,
           messages: [...initial_messages, ...messages],
