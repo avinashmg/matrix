@@ -135,7 +135,7 @@
   };
 </script>
 
-<div class="topbar">AI CHAT</div>
+<div class="topbar">V friend</div>
 <div class="leftsidebar">
   <IdCard
     id_image={character.id_image}
@@ -153,13 +153,16 @@
         </div>
       {:else if message.role === "assistant"}
         <div class="assistantmessage">
-          <strong class="username">{ai_role}</strong>
+          <strong class="username">{ai_role} </strong>
           {@html converter.makeHtml(message.content)}
         </div>
       {/if}
     {/each}
     {#if typing}
-      <strong class="username">{ai_role}</strong>
+      <strong class="username glowing"
+        >{ai_role}
+        <div class="spinner">⁐</div></strong
+      >
       <div class="assistantmessage">{@html converter.makeHtml(streamText)}</div>
     {/if}
   </div>
@@ -176,6 +179,20 @@
 </div>
 
 <style>
+  .spinner {
+    animation: spin 1s linear infinite;
+    display: inline-block;
+    margin-left: 10px;
+  }
+
+  @keyframes spin {
+    0% {
+      transform: rotate(0deg);
+    }
+    100% {
+      transform: rotate(360deg);
+    }
+  }
   .leftsidebar {
     position: fixed;
     top: 60px;
