@@ -1,14 +1,17 @@
+<script>
+  export let id_image =
+    "https://www.showbizjunkies.com/wp-content/uploads/2021/05/next-level-chef-gordon-ramsay.jpg";
+  export let name = "Gordon Ramsay";
+  export let subtitle = "Chef";
+</script>
+
 <div class="card">
   <div class="id_image_container">
-    <img
-      class="id_image"
-      src="https://www.washingtonpost.com/resizer/KkRVfO2fP56KislxAI6qlYDPFIE=/1440x0/smart/arc-anglerfish-washpost-prod-washpost.s3.amazonaws.com/public/3NLTPJSHHQY2PPQBQ6VGZVPV3M.jpg"
-      alt="Donald Trump"
-    />
+    <img class="id_image" src={id_image} alt={name} />
   </div>
   <div>
-    <div class="name">Donald Trump</div>
-    <div class="subtitle">President of the United States</div>
+    <div class="name">{name}</div>
+    <div class="subtitle">{subtitle}</div>
   </div>
 </div>
 
