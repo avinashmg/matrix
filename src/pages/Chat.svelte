@@ -2,6 +2,8 @@
   import showdown from "showdown";
   import IdCard from "../lib/IdCard.svelte";
   import { onMount } from "svelte";
+  import CharList from "../lib/CharList.svelte";
+  import ChatHistory from "../lib/ChatHistory.svelte";
   let textinput = "";
   let messages = [];
   let character = {
@@ -40,6 +42,16 @@
 
   const converter = new showdown.Converter();
 
+  const chatScroll = () => {
+    setTimeout(() => {
+      const chatscreen = document.getElementsByClassName("chatscreen")[0];
+      chatscreen.scrollTop = chatscreen.scrollHeight;
+    }, 50);
+  };
+  onMount(() => {
+    messages = JSON.parse(localStorage.getItem("chat_history")) || [];
+    chatScroll();
+  });
   function parseChunk(chunk) {
     const lines = chunk.split("\n").filter((line) => line.trim() !== "");
     let parsedText = "";
@@ -54,17 +66,25 @@
     }
     return parsedText;
   }
-  const send = async () => {
+
+  const chatToLocalStorage = () => {
+    localStorage.setItem("chat_history", JSON.stringify(messages));
+  };
+
+  const send = async (regen = false) => {
+    chatToLocalStorage();
+    chatScroll();
     if (typing) return;
-    if (textinput === "") return;
-    messages = [
-      ...messages,
-      {
-        id: Date.now().toString(),
-        role: "user",
-        content: textinput,
-      },
-    ];
+    if (textinput === "" && !regen) return;
+    if (!regen)
+      messages = [
+        ...messages,
+        {
+          id: Date.now().toString(),
+          role: "user",
+          content: textinput,
+        },
+      ];
 
     textinput = "";
     typing = true;
@@ -113,6 +133,7 @@
       const chunk = decoder.decode(value);
       const parsedContent = parseChunk(chunk);
       streamText += parsedContent;
+      chatScroll();
     }
     messages = [
       ...messages,
@@ -124,7 +145,7 @@
     ];
     typing = false;
     streamText = "";
-    document.getElementsByClassName("chatscreen")[0].scrollTo(0, 9999);
+    chatToLocalStorage();
   };
 
   const enterKeyHandler = (e) => {
@@ -133,52 +154,153 @@
       send();
     }
   };
+
+  const regen_last = () => {
+    if (messages[messages.length - 1].role === "assistant") {
+      {
+        messages = messages.slice(0, messages.length - 1);
+        send(true);
+      }
+    }
+  };
+
+  let leftSidebarOpen = false;
+  const toggleLeftSidebar = () => {
+    leftSidebarOpen = !leftSidebarOpen;
+  };
+  const newchat = () => {
+    messages = [];
+    chatToLocalStorage();
+    chatScroll();
+  };
 </script>
 
-<div class="topbar">V friend</div>
-<div class="leftsidebar">
-  <IdCard
-    id_image={character.id_image}
-    name={character.name}
-    subtitle={character.subtitle}
-  />
-</div>
-<div class="flex-column">
-  <div class="chatscreen">
-    {#each messages as message}
-      {#if message.role === "user"}
-        <div class="usermessage">
-          <strong class="username">You</strong>
-          {@html converter.makeHtml(message.content)}
-        </div>
-      {:else if message.role === "assistant"}
-        <div class="assistantmessage">
-          <strong class="username">{ai_role} </strong>
-          {@html converter.makeHtml(message.content)}
-        </div>
-      {/if}
-    {/each}
-    {#if typing}
-      <strong class="username glowing"
-        >{ai_role}
-        <div class="spinner">⁐</div></strong
-      >
-      <div class="assistantmessage">{@html converter.makeHtml(streamText)}</div>
-    {/if}
+<div class="topbar">
+  <div class="hamburger" on:click={() => toggleLeftSidebar()}>
+    <svg
+      data-slot="icon"
+      aria-hidden="true"
+      fill="none"
+      stroke-width="1.5"
+      stroke="currentColor"
+      viewBox="0 0 24 24"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <path
+        d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      ></path>
+    </svg>
   </div>
+  <div class="title">VFriend</div>
+  <div></div>
+</div>
+<div
+  style="display: flex; width: 100vw; height: calc(100vh - 80px); gap: 10px; justify-content: space-between; margin-top: 60px;"
+>
+  <div class="leftsidebar">
+    <IdCard
+      id_image={character.id_image}
+      name={character.name}
+      subtitle={character.subtitle}
+    />
+    <CharList />
 
-  <div class="chatinput">
-    <textarea
-      bind:value={textinput}
-      on:keydown={(e) => {
-        enterKeyHandler(e);
-      }}
-    ></textarea>
-    <button on:click={send}>Send</button>
+    <div
+      style="width: calc(100% - 10px); background-color: var(--background); margin-top: 10px; border-radius: 5px; display: flex; justify-content: center; align-items: center; padding: 5px; gap: 5px;"
+    >
+      <button on:click={newchat}>New Chat</button>
+    </div>
+  </div>
+  <div class="flex-column">
+    <div class="chatscreen">
+      <div id="chats">
+        {#each messages as message}
+          {#if message.role === "user"}
+            <div class="usermessage">
+              <strong class="username blue">You</strong>
+              {@html converter.makeHtml(message.content)}
+            </div>
+          {:else if message.role === "assistant"}
+            <div class="assistantmessage">
+              <strong class="username yellow">{ai_role} </strong>
+              {@html converter.makeHtml(message.content)}
+              <div class="opts">
+                {#if message.id === messages[messages.length - 1].id}
+                  <div class="small-btn" on:click={() => regen_last()}>
+                    <svg
+                      data-slot="icon"
+                      aria-hidden="true"
+                      fill="none"
+                      stroke-width="1.5"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <path
+                        d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182m0-4.991v4.99"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                      ></path>
+                    </svg>
+                  </div>
+                {/if}
+              </div>
+            </div>
+          {/if}
+        {/each}
+        {#if typing}
+          <strong class="username glowing yellow"
+            >{ai_role}
+            <div class="spinner">⁐</div></strong
+          >
+          <div class="assistantmessage">
+            {@html converter.makeHtml(streamText)}
+          </div>
+        {/if}
+      </div>
+    </div>
+
+    <div class="chatinput">
+      <textarea
+        bind:value={textinput}
+        on:keydown={(e) => {
+          enterKeyHandler(e);
+        }}
+      ></textarea>
+      <button on:click={send}>Send</button>
+    </div>
+  </div>
+  <div class="leftsidebar">
+    <ChatHistory />
   </div>
 </div>
 
 <style>
+  .small-btn {
+    height: 30px;
+    width: 30px;
+    width: fit-content;
+    font-size: 13px;
+    color: #ccc;
+    padding: 0;
+    cursor: pointer;
+  }
+  .small-btn > svg {
+    height: 20px;
+    stroke: var(--text-muted);
+  }
+  .small-btn:hover > svg {
+    stroke: var(--links);
+  }
+  .hamburger {
+    cursor: pointer;
+    height: 40px;
+    width: 40px;
+    margin: 5px;
+    display: none;
+  }
   .spinner {
     animation: spin 1s linear infinite;
     display: inline-block;
@@ -194,16 +316,14 @@
     }
   }
   .leftsidebar {
-    position: fixed;
     top: 60px;
     width: 400px;
     left: 10px;
-    height: calc(100vh - 70px);
+    height: 100%;
   }
   .username {
     font-weight: bold;
     margin-right: 10px;
-    color: var(--text-muted);
   }
   .usermessage {
     border-bottom: #414141 solid 1px;
@@ -220,13 +340,12 @@
   }
 
   .flex-column {
-    position: fixed;
-    top: 0;
     display: flex;
     flex-direction: column;
-    height: 100vh;
+    flex-grow: 1;
     align-items: center;
     gap: 10px;
+    max-width: 60%;
   }
 
   .topbar {
@@ -238,15 +357,16 @@
     width: 100vw;
     font-size: 20px;
     line-height: 50px;
-    text-align: center;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
     background-color: #383838;
     color: #ffffff;
     font-weight: bold;
   }
 
   .chatscreen {
-    width: 600px;
-    margin-top: 60px;
+    width: calc(100% - 40px);
     background-color: var(--background);
     padding: 10px 20px;
     flex-grow: 1;
@@ -258,7 +378,7 @@
   }
 
   .chatinput {
-    width: calc(600px + 40px);
+    width: calc(100%);
     height: 120px;
     color: var(--button-base);
     display: flex;
@@ -278,24 +398,17 @@
     height: 100px;
   }
   @media (max-width: 600px) {
+    .hamburger {
+      display: block;
+    }
+    .topbar {
+    }
     .leftsidebar {
       display: none;
     }
     .flex-column {
-      left: 25px;
-      width: calc(100vw - 50px);
-    }
-    .chatinput {
-      width: calc(100vw - 20px);
-    }
-    .chatscreen {
-      width: calc(100%);
-    }
-    .topbar {
-      width: 100vw;
-    }
-    .chatinput textarea {
-      width: 100%;
+      max-width: calc(100% - 10px);
+      margin-left: 5px;
     }
   }
 </style>

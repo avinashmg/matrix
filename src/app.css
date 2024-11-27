@@ -108,9 +108,8 @@ body {
     "Helvetica Neue", "Segoe UI Emoji", "Apple Color Emoji", "Noto Color Emoji",
     sans-serif;
   line-height: 1.4;
-  max-width: 800px;
-  margin: 20px auto;
-  padding: 0 10px;
+  margin: 0;
+  padding: 0;
   word-wrap: break-word;
   color: #363636;
   color: var(--text-main);
@@ -1589,4 +1588,20 @@ body > footer {
 /* ADDITIONAL CSS */
 .usermessage > p {
   margin: 10px;
+}
+
+.yellow {
+  color: #ffdf5e;
+}
+
+.red {
+  color: #ff0000;
+}
+
+.green {
+  color: #37ff7a;
+}
+
+.blue {
+  color: #1897ff;
 }
