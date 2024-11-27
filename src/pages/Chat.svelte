@@ -76,7 +76,7 @@
     chatScroll();
     if (typing) return;
     if (textinput === "" && !regen) return;
-    if (!regen)
+    if (regen !== true)
       messages = [
         ...messages,
         {
