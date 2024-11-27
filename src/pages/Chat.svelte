@@ -208,13 +208,18 @@
     <CharList />
 
     <div
-      style="width: calc(100% - 10px); background-color: var(--background); margin-top: 10px; border-radius: 5px; display: flex; justify-content: center; align-items: center; padding: 5px; gap: 5px;"
+      style="  border: 1px solid var(--border) ;width: calc(100% - 10px); background-color: var(--background); margin-top: 10px; border-radius: 5px; display: flex; justify-content: center; align-items: center; padding: 5px; gap: 5px;"
     >
       <button on:click={newchat}>New Chat</button>
     </div>
   </div>
   <div class="flex-column">
     <div class="chatscreen">
+      <div class="charinfo mobile-only">
+        <img src={character.id_image} alt="" />
+        <div class="title">{character.name}</div>
+        <div class="subtitle">{character.subtitle}</div>
+      </div>
       <div id="chats">
         {#each messages as message}
           {#if message.role === "user"}
@@ -264,12 +269,25 @@
 
     <div class="chatinput">
       <textarea
+        placeholder="Type a message..."
         bind:value={textinput}
         on:keydown={(e) => {
           enterKeyHandler(e);
         }}
       ></textarea>
-      <button on:click={send}>Send</button>
+      <button on:click={send}
+        ><svg
+          data-slot="icon"
+          aria-hidden="true"
+          fill="currentColor"
+          viewBox="0 0 20 20"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="M3.105 2.288a.75.75 0 0 0-.826.95l1.414 4.926A1.5 1.5 0 0 0 5.135 9.25h6.115a.75.75 0 0 1 0 1.5H5.135a1.5 1.5 0 0 0-1.442 1.086l-1.414 4.926a.75.75 0 0 0 .826.95 28.897 28.897 0 0 0 15.293-7.155.75.75 0 0 0 0-1.114A28.897 28.897 0 0 0 3.105 2.288Z"
+          ></path>
+        </svg></button
+      >
     </div>
   </div>
   <div class="leftsidebar">
@@ -278,6 +296,25 @@
 </div>
 
 <style>
+  .charinfo {
+    text-align: center;
+    gap: 10px;
+    margin-bottom: 10px;
+    width: 100%;
+  }
+  .charinfo > img {
+    height: 100px;
+    width: 100px;
+    border-radius: 50px;
+  }
+  .charinfo .title {
+    font-size: 20px;
+    font-weight: bold;
+  }
+  .charinfo .subtitle {
+    font-size: 15px;
+    color: var(--text-muted);
+  }
   .small-btn {
     height: 30px;
     width: 30px;
@@ -320,6 +357,7 @@
     width: 400px;
     left: 10px;
     height: 100%;
+    margin-left: 5px;
   }
   .username {
     font-weight: bold;
@@ -382,22 +420,47 @@
     height: 120px;
     color: var(--button-base);
     display: flex;
+    background-color: var(--background);
+    border-radius: 5px;
     gap: 10px;
+    align-items: center;
   }
 
-  .chatinput textarea {
+  .chatinput > textarea {
     flex-grow: 1;
     height: 100px;
     background-color: var(--background);
     border-radius: 5px;
     padding: 10px;
     resize: none;
+    outline: none;
   }
 
-  .chatinput button {
-    height: 100px;
+  .chatinput > textarea:focus {
+    box-shadow: none;
+  }
+
+  .chatinput > button {
+    height: 60px;
+    width: 60px;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 40px;
+  }
+  .chatinput > button > svg {
+    height: 26px;
+    stroke: var(--text-main);
+    fill: var(--text-main);
+  }
+  .mobile-only {
+    display: none;
   }
   @media (max-width: 600px) {
+    .mobile-only {
+      display: block;
+    }
     .hamburger {
       display: block;
     }

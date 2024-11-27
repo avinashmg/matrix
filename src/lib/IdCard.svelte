@@ -18,7 +18,7 @@
 <style>
   .card {
     background-color: var(--background);
-    border: 1px solid rgb(97, 97, 97);
+    border: 1px solid var(--border);
     border-radius: 10px;
     padding: 10px;
     display: flex;

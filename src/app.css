@@ -39,10 +39,10 @@
     --text-muted: #a9b1ba;
     --links: #41adff;
     --focus: #0096bfab;
-    --border: #526980;
+    --border: #666666;
     --code: #ffbe85;
     --animation-duration: 0.1s;
-    --button-base: #0c151c;
+    --button-base: #131313;
     --button-hover: #040a0f;
     --scrollbar-thumb: var(--button-hover);
     --scrollbar-thumb-hover: rgb(0, 0, 0);
@@ -1591,17 +1591,21 @@ body > footer {
 }
 
 .yellow {
-  color: #ffdf5e;
+  color: #ffcc02;
+  text-shadow: #000 1px 0 0, #000 0 1px 0, #000 -1px 0 0, #000 0 -1px 0;
 }
 
 .red {
   color: #ff0000;
+  text-shadow: #000 1px 0 0, #000 0 1px 0, #000 -1px 0 0, #000 0 -1px 0;
 }
 
 .green {
   color: #37ff7a;
+  text-shadow: #000 1px 0 0, #000 0 1px 0, #000 -1px 0 0, #000 0 -1px 0;
 }
 
 .blue {
   color: #1897ff;
+  text-shadow: #000 1px 0 0, #000 0 1px 0, #000 -1px 0 0, #000 0 -1px 0;
 }
