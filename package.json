@@ -14,6 +14,8 @@
     "vite": "^5.4.1"
   },
   "dependencies": {
-    "showdown": "^2.1.0"
+    "appwrite": "^16.0.2",
+    "showdown": "^2.1.0",
+    "svelte-routing": "^2.13.0"
   }
 }

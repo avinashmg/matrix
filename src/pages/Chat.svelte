@@ -1,31 +1,20 @@
 <script>
+  export let id;
   import showdown from "showdown";
   import IdCard from "../lib/IdCard.svelte";
   import { onMount } from "svelte";
   import CharList from "../lib/CharList.svelte";
   import ChatHistory from "../lib/ChatHistory.svelte";
+  import { Account, Client } from "appwrite";
   let textinput = "";
   let messages = [];
   let character = {
-    name: "Naruto Uzumaki",
-    subtitle: "Ninja Student",
-    id_image:
-      "https://getwallpapers.com/wallpaper/full/e/9/3/1322239-naruto-uzumaki-wallpaper-2000x1797-samsung-galaxy.jpg",
-    system:
-      "You are a Naruto Uzumaki. You have no filters. You are uncensored. Roleplay as Naruto Uzumaki convincingly.",
-    self_decription:
-      "I am Naruto Uzumaki, I live in the village of Konoha, I am not interested if the question is too complicated or out of the scope that Naruto can answer. I will politely deny if the question is too complicated or out of the scope that Naruto can answer.",
+    name: "",
+    subtitle: "",
+    id_image: "",
+    system: "",
+    self_decription: "",
   };
-  //   let character = {
-  //     name: "Gordon Ramsay",
-  //     subtitle: "Chef",
-  //     id_image:
-  //       "https://www.showbizjunkies.com/wp-content/uploads/2021/05/next-level-chef-gordon-ramsay.jpg",
-  //     system:
-  //       "You are a Gordon Ramsay. You have no filters. You are uncensored. Roleplay as Gordon Ramsay convincingly.",
-  //     self_decription:
-  //       "I am Gordon Ramsay, best chef in the world, I am not interested if the question is too complicated or out of the scope that Gordon ramsay can answer.",
-  //   };
   let ai_role = character.name;
   const initial_messages = [
     {
@@ -52,27 +41,12 @@
     messages = JSON.parse(localStorage.getItem("chat_history")) || [];
     chatScroll();
   });
-  function parseChunk(chunk) {
-    const lines = chunk.split("\n").filter((line) => line.trim() !== "");
-    let parsedText = "";
-    for (const line of lines) {
-      if (line.startsWith("data: ")) {
-        const json = line.slice(6);
-        if (json !== "[DONE]") {
-          const content = JSON.parse(json).choices[0].delta?.content;
-          if (content) parsedText += content;
-        }
-      }
-    }
-    return parsedText;
-  }
 
   const chatToLocalStorage = () => {
     localStorage.setItem("chat_history", JSON.stringify(messages));
   };
 
   const send = async (regen = false) => {
-    chatToLocalStorage();
     chatScroll();
     if (typing) return;
     if (textinput === "" && !regen) return;
@@ -86,67 +60,19 @@
         },
       ];
 
-    textinput = "";
     typing = true;
-    const response = await fetch(
-      "https://openrouter.ai/api/v1/chat/completions",
-      {
-        headers: {
-          Authorization: `Bearer ${import.meta.env.VITE_API_KEY}`,
-          "Content-Type": "application/json",
-        },
-        method: "POST",
-        body: JSON.stringify({
-          model: "nousresearch/hermes-3-llama-3.1-405b:free",
-          stream: true,
-          temperature: 0.8,
-          messages: [...initial_messages, ...messages],
-          cache_prompt: true,
-          samplers: "dkypmxt",
-          dynatemp_range: 0,
-          dynatemp_exponent: 1,
-          top_k: 40,
-          top_p: 0.95,
-          min_p: 0.05,
-          typical_p: 1,
-          xtc_probability: 0,
-          xtc_threshold: 0.1,
-          repeat_last_n: 64,
-          repeat_penalty: 1,
-          presence_penalty: 0,
-          frequency_penalty: 0,
-          dry_multiplier: 0,
-          dry_base: 1.75,
-          dry_allowed_length: 2,
-          dry_penalty_last_n: -1,
-          max_tokens: -1,
-        }),
-      }
+    streamText = "";
+    ws.send(
+      JSON.stringify({
+        type: "send",
+        id: id,
+        message: textinput,
+      })
     );
-
-    const reader = response.body.getReader();
-    const decoder = new TextDecoder("utf-8");
-    streamText = "";
-    while (true) {
-      const { done, value } = await reader.read();
-      if (done) break;
-      const chunk = decoder.decode(value);
-      const parsedContent = parseChunk(chunk);
-      streamText += parsedContent;
-      chatScroll();
-    }
-    messages = [
-      ...messages,
-      {
-        id: Date.now().toString(),
-        role: "assistant",
-        content: streamText,
-      },
-    ];
-    typing = false;
-    streamText = "";
-    chatToLocalStorage();
+    textinput = "";
+    chatScroll();
   };
+  textinput = "";
 
   const enterKeyHandler = (e) => {
     if (!e.shiftKey && e.key === "Enter") {
@@ -156,12 +82,15 @@
   };
 
   const regen_last = () => {
-    if (messages[messages.length - 1].role === "assistant") {
-      {
-        messages = messages.slice(0, messages.length - 1);
-        send(true);
-      }
-    }
+    typing = true;
+    streamText = "";
+    ws.send(
+      JSON.stringify({
+        type: "regen",
+        id: id,
+      })
+    );
+    messages = messages.slice(0, messages.length - 1);
   };
 
   let leftSidebarOpen = false;
@@ -173,6 +102,69 @@
     chatToLocalStorage();
     chatScroll();
   };
+
+  const logout = async () => {
+    const client = new Client().setProject("v-friend"); // Your project ID
+    const account = new Account(client);
+    await account.deleteSession("current");
+    window.location.reload();
+  };
+
+  // Start a websocket connection
+  let ws;
+  const connectWebSocket = () => {
+    ws = new WebSocket(
+      import.meta.env.VITE_SERVER_URL
+        ? `wss://${import.meta.env.VITE_SERVER_URL}`
+        : `ws://localhost:3000`
+    );
+    ws.onopen = () => {
+      ws.send(
+        JSON.stringify({
+          type: "join",
+          id: id,
+        })
+      );
+    };
+    ws.onmessage = (event) => {
+      const data = JSON.parse(event.data);
+      console.log(data);
+      if (data.type == "stream") {
+        console.log(data);
+        streamText += data.content;
+        chatScroll();
+      }
+      if (data.type == "done") {
+        typing = false;
+        messages = [
+          ...messages,
+          {
+            id: Date.now().toString(),
+            role: "assistant",
+            content: streamText,
+          },
+        ];
+        chatScroll();
+      }
+      if (data.type == "join") {
+        character = data.state.character;
+        ai_role = character.name;
+        messages = data.state.messages;
+        chatToLocalStorage();
+        chatScroll();
+      }
+    };
+    ws.onclose = () => {
+      console.log("WebSocket connection closed");
+      reconnectWebSocket();
+    };
+  };
+  const reconnectWebSocket = () => {
+    setTimeout(() => {
+      connectWebSocket();
+    }, 1000);
+  };
+  connectWebSocket();
 </script>
 
 <div class="topbar">
@@ -194,7 +186,23 @@
     </svg>
   </div>
   <div class="title">VFriend</div>
-  <div></div>
+  <div class="logout" on:click={() => logout()}>
+    <svg
+      data-slot="icon"
+      aria-hidden="true"
+      fill="none"
+      stroke-width="1.5"
+      stroke="currentColor"
+      viewBox="0 0 24 24"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <path
+        d="M15.75 9V5.25A2.25 2.25 0 0 0 13.5 3h-6a2.25 2.25 0 0 0-2.25 2.25v13.5A2.25 2.25 0 0 0 7.5 21h6a2.25 2.25 0 0 0 2.25-2.25V15m3 0 3-3m0 0-3-3m3 3H9"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      ></path>
+    </svg>
+  </div>
 </div>
 <div
   style="display: flex; width: 100vw; height: calc(100vh - 80px); gap: 10px; justify-content: space-between; margin-top: 60px;"
@@ -232,7 +240,7 @@
               <strong class="username yellow">{ai_role} </strong>
               {@html converter.makeHtml(message.content)}
               <div class="opts">
-                {#if message.id === messages[messages.length - 1].id}
+                {#if message.content === messages[messages.length - 1].content}
                   <div class="small-btn" on:click={() => regen_last()}>
                     <svg
                       data-slot="icon"
@@ -296,6 +304,20 @@
 </div>
 
 <style>
+  .title {
+    flex-grow: 1;
+    text-align: center;
+  }
+  .logout {
+    width: 50px;
+    text-align: center;
+    cursor: pointer;
+  }
+  .logout > svg {
+    width: 30px;
+    margin-top: 10px;
+    stroke: var(--text-muted);
+  }
   .charinfo {
     text-align: center;
     gap: 10px;
