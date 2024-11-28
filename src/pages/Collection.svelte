@@ -1,10 +1,12 @@
 <script>
+  import { onMount } from "svelte";
+
   let server_url = import.meta.env.VITE_SERVER_URL;
   const newchat = async (id) => {
     const response = await fetch(
       server_url
         ? `https://${server_url}/newchat`
-        : "http://localhost:3000/newchat",
+        : "http://localhost:3024/newchat",
       {
         method: "POST",
         headers: {
@@ -20,6 +22,17 @@
       window.location.href = `/chat/${data.id}`;
     }
   };
+  let chars = [];
+  const getchars = async () => {
+    const response = await fetch(
+      server_url
+        ? `https://${server_url}/characters`
+        : "http://localhost:3024/characters"
+    );
+    const data = await response.json();
+    chars = data;
+  };
+  getchars();
 </script>
 
 <div class="topbar">
@@ -63,23 +76,28 @@
   <h1>Characters</h1>
 </div>
 
-<div style="margin: 100px; display: flex; flex-wrap: wrap; gap: 20px">
-  <div class="char">
-    NARUTO
-    <button on:click={() => newchat("naruto")}>Start Chat</button>
-  </div>
-  <div class="char">
-    GORDON RAMSAY
-
-    <button on:click={() => newchat("gordon")}>Start Chat</button>
-  </div>
-  <div class="char">
-    GAL GADOT
-    <button on:click={() => newchat("gal")}>Start Chat</button>
-  </div>
+<div class="char_container">
+  {#each Object.values(chars) as char}
+    <div class="char">
+      <div class="pic">
+        <img src={char.id_image} alt={char.name} />
+      </div>
+      <div class="name">
+        {char.name}
+      </div>
+      <div class="subname">{char.subtitle}</div>
+      <button on:click={() => newchat(char.id)}>Start Chat</button>
+    </div>
+  {/each}
 </div>
 
 <style>
+  .char_container {
+    margin: 100px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+  }
   .char {
     display: flex;
     flex-direction: column;
@@ -92,8 +110,29 @@
     border-radius: 5px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   }
+
+  .char:hover {
+    transform: scale(1.05);
+    transition: transform 0.3s cubic-bezier(0.98, 0.74, 0.16, 0.98);
+  }
+  .char > .name {
+    margin-top: 10px;
+    font-size: 20px;
+    font-weight: bold;
+  }
+  .char > .pic {
+    width: 200px;
+    height: 200px;
+    border-radius: 100px;
+    overflow: hidden;
+  }
+  .char > .pic > img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
   .char > button {
-    margin-top: 100px;
+    margin-top: 60px;
   }
   .hamburger {
     cursor: pointer;
@@ -140,5 +179,16 @@
     font-weight: bold;
     flex-grow: 1;
     text-align: center;
+  }
+
+  @media (max-width: 600px) {
+    .char_container {
+      margin: 10px;
+      width: 100%;
+    }
+
+    .char {
+      width: calc(100% - 20px);
+    }
   }
 </style>
