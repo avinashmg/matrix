@@ -16,6 +16,7 @@
     self_decription: "",
   };
   let ai_role = character.name;
+  let ws_url = import.meta.env.VITE_SERVER_URL;
   const initial_messages = [
     {
       role: "system",
@@ -113,11 +114,7 @@
   // Start a websocket connection
   let ws;
   const connectWebSocket = () => {
-    ws = new WebSocket(
-      import.meta.env.VITE_SERVER_URL
-        ? `wss://${import.meta.env.VITE_SERVER_URL}`
-        : `ws://localhost:3000`
-    );
+    ws = new WebSocket(ws_url ? `wss://${ws_url}` : `ws://localhost:3000`);
     ws.onopen = () => {
       ws.send(
         JSON.stringify({
