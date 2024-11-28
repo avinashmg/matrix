@@ -25,8 +25,10 @@
   });
 
   let phone = "";
-  let userId;
+  let userId = undefined;
   let SecretCode;
+  let show_code = false;
+  let log = "";
   const signin = async () => {
     const account = new Account(client);
     const token = await account.createPhoneToken(
@@ -36,6 +38,7 @@
 
     userId = token.userId;
     console.log(token);
+    show_code = true;
   };
 
   const phoneVerify = async () => {
@@ -53,7 +56,8 @@
 </script>
 
 <div class="signin">
-  {#if userId !== false}
+  {log}
+  {#if show_code === false}
     <h1>Enter using Phone</h1>
     {#if iti}
       {iti.getNumber()}
@@ -66,7 +70,7 @@
         placeholder="Phone number"
       />
     </div>
-    <button on:click={signin}>Sign in</button>
+    <button on:click={() => signin()}>Sign in</button>
   {:else}
     <h1>Enter the Code</h1>
     <p>A code has been sent to {phone}. Please enter it below</p>
