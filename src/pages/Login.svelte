@@ -53,7 +53,7 @@
 </script>
 
 <div class="signin">
-  {#if !userId}
+  {#if userId !== false}
     <h1>Enter using Phone</h1>
     {#if iti}
       {iti.getNumber()}
