@@ -1,14 +1,20 @@
 <script>
+  let server_url = import.meta.env.VITE_SERVER_URL;
   const newchat = async (id) => {
-    const response = await fetch("http://localhost:3000/newchat", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        id: id,
-      }),
-    });
+    const response = await fetch(
+      server_url
+        ? `https://${server_url}/newchat`
+        : "http://localhost:3000/newchat",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          id: id,
+        }),
+      }
+    );
     const data = await response.json();
     if (data.id) {
       window.location.href = `/chat/${data.id}`;
