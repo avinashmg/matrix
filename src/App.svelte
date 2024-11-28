@@ -17,6 +17,7 @@
       loggedIn = true;
     } catch (error) {
       console.log(error);
+      loggedIn = false;
     }
   };
   checkLogin();
