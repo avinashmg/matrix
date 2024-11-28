@@ -14,7 +14,7 @@
     console.log(account);
     try {
       const user = await account.get();
-      loggedIn = true;
+      console.log(user);
     } catch (error) {
       window.location.href = "/login";
     }
