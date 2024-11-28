@@ -15,6 +15,7 @@
   },
   "dependencies": {
     "appwrite": "^16.0.2",
+    "intl-tel-input": "^24.7.0",
     "showdown": "^2.1.0",
     "svelte-routing": "^2.13.0"
   }
