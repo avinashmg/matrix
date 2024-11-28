@@ -2,7 +2,7 @@
   import { onMount } from "svelte";
   import Chat from "./pages/Chat.svelte";
   import { Client, Account } from "appwrite";
-  import { Route, Router } from "svelte-routing";
+  import { navigate, Route, Router } from "svelte-routing";
   import Collection from "./pages/Collection.svelte";
   import Login from "./pages/Login.svelte";
   const client = new Client();
@@ -16,7 +16,8 @@
       const user = await account.get();
       console.log(user);
     } catch (error) {
-      window.location.href = "/login";
+      console.log(error);
+      navigate("/login");
     }
   };
   checkLogin();
