@@ -7,21 +7,6 @@
   import Login from "./pages/Login.svelte";
   const client = new Client();
   client.setProject("v-friend");
-
-  const checkLogin = async () => {
-    if (window.location.pathname === "/login") return;
-    const account = new Account(client);
-    console.log(account);
-    try {
-      const user = await account.get();
-      console.log(user);
-    } catch (error) {
-      console.log(error);
-      navigate("/login");
-    }
-  };
-  checkLogin();
-  console.log(import.meta.env.VITE_SERVER_URL);
 </script>
 
 <Router>
