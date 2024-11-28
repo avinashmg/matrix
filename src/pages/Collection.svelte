@@ -77,16 +77,16 @@
 </div>
 
 <div class="char_container">
-  {#each Object.values(chars) as char}
+  {#each Object.keys(chars) as key}
     <div class="char">
       <div class="pic">
-        <img src={char.id_image} alt={char.name} />
+        <img src={chars[key].id_image} alt={chars[key].name} />
       </div>
       <div class="name">
-        {char.name}
+        {chars[key].name}
       </div>
-      <div class="subname">{char.subtitle}</div>
-      <button on:click={() => newchat(char.id)}>Start Chat</button>
+      <div class="subname">{chars[key].subtitle}</div>
+      <button on:click={() => newchat(key)}>Start Chat</button>
     </div>
   {/each}
 </div>
