@@ -44,7 +44,7 @@
       const session = await account.createSession(userId, SecretCode);
       console.log(session);
       localStorage.setItem("session", JSON.stringify(session));
-      loggedIn = true;
+      window.location.href = "/";
     } catch (error) {
       console.log(error);
       alert("Wrong Code, Please enter the correct code");
