@@ -1,5 +1,5 @@
 <script>
-  import { Account, Client } from "appwrite";
+  import { Account, Client, ID } from "appwrite";
   import { onMount } from "svelte";
   let iti = null;
   let loggedIn = undefined;
