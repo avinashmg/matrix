@@ -16,7 +16,10 @@
     self_decription: "",
   };
   let ai_role = character.name;
-  let ws_url = import.meta.env.VITE_SERVER_URL;
+  let ws_url = import.meta.env.VITE_SERVER_URL
+    ? `wss://${import.meta.env.VITE_SERVER_URL}`
+    : `ws://localhost:3024`;
+
   const initial_messages = [
     {
       role: "system",
@@ -98,10 +101,32 @@
   const toggleLeftSidebar = () => {
     leftSidebarOpen = !leftSidebarOpen;
   };
-  const newchat = () => {
+
+  let char_id = "";
+  const newchat = async () => {
+    if (char_id == "") return;
     messages = [];
     chatToLocalStorage();
     chatScroll();
+    let server_url = import.meta.env.VITE_SERVER_URL;
+    const response = await fetch(
+      server_url
+        ? `https://${server_url}/newchat`
+        : "http://localhost:3024/newchat",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          id: char_id,
+        }),
+      }
+    );
+    const data = await response.json();
+    if (data.id) {
+      window.location.href = `/chat/${data.id}`;
+    }
   };
 
   const logout = async () => {
@@ -114,7 +139,7 @@
   // Start a websocket connection
   let ws;
   const connectWebSocket = () => {
-    ws = new WebSocket(ws_url ? `wss://${ws_url}` : `ws://localhost:3000`);
+    ws = new WebSocket(ws_url);
     ws.onopen = () => {
       ws.send(
         JSON.stringify({
@@ -145,6 +170,7 @@
       }
       if (data.type == "join") {
         character = data.state.character;
+        char_id = data.state.id;
         ai_role = character.name;
         messages = data.state.messages;
         chatToLocalStorage();
@@ -211,12 +237,13 @@
       subtitle={character.subtitle}
     />
     <CharList />
-
-    <div
-      style="  border: 1px solid var(--border) ;width: calc(100% - 10px); background-color: var(--background); margin-top: 10px; border-radius: 5px; display: flex; justify-content: center; align-items: center; padding: 5px; gap: 5px;"
-    >
-      <button on:click={newchat}>New Chat</button>
-    </div>
+    {#if char_id}
+      <div
+        style="  border: 1px solid var(--border) ;width: calc(100% - 10px); background-color: var(--background); margin-top: 10px; border-radius: 5px; display: flex; justify-content: center; align-items: center; padding: 5px; gap: 5px;"
+      >
+        <button on:click={newchat}>New Chat</button>
+      </div>
+    {/if}
   </div>
   <div class="flex-column">
     <div class="chatscreen">
