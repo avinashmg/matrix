@@ -1609,3 +1609,19 @@ body > footer {
   color: #1897ff;
   text-shadow: #000 1px 0 0, #000 0 1px 0, #000 -1px 0 0, #000 0 -1px 0;
 }
+
+.pics {
+  height: 600px;
+}
+
+.imgcontainer {
+  background-image: url("/loading.gif");
+  background-position: center;
+  background-size: cover;
+  margin: 10px;
+  border-radius: 10px;
+  justify-content: center;
+  height: 500px;
+  width: 500px;
+  overflow: hidden;
+}

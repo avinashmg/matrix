@@ -188,6 +188,22 @@
     }, 1000);
   };
   connectWebSocket();
+
+  const check_for_image = (text, flag) => {
+    if (text.includes("[img]")) {
+      if (flag) {
+        let out = text.split("[img]")[0];
+        let imageurl =
+          `https://image.pollinations.ai/prompt/` +
+          text.split("[img](")[1].split(")")[0] +
+          `?width=250&height=300`;
+        out += `\n <div class="imgcontainer"><img class="pics" src="${imageurl}"> </div>`;
+        return out;
+      }
+      return text.split("[img]")[0];
+    }
+    return text;
+  };
 </script>
 
 <div class="topbar">
@@ -262,7 +278,7 @@
           {:else if message.role === "assistant"}
             <div class="assistantmessage">
               <strong class="username yellow">{ai_role} </strong>
-              {@html converter.makeHtml(message.content)}
+              {@html converter.makeHtml(check_for_image(message.content, true))}
               <div class="opts">
                 {#if message.content === messages[messages.length - 1].content}
                   <div class="small-btn" on:click={() => regen_last()}>
@@ -293,7 +309,7 @@
             <div class="spinner">⁐</div></strong
           >
           <div class="assistantmessage">
-            {@html converter.makeHtml(streamText)}
+            {@html converter.makeHtml(check_for_image(streamText, false))}
           </div>
         {/if}
       </div>
@@ -519,5 +535,8 @@
       max-width: calc(100% - 10px);
       margin-left: 5px;
     }
+  }
+  .pics {
+    border-radius: 10px;
   }
 </style>
