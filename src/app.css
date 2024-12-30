@@ -1625,3 +1625,15 @@ body > footer {
   width: 500px;
   overflow: hidden;
 }
+
+@media screen and (max-width: 600px) {
+  .imgcontainer {
+    height: 250px;
+    width: 250px;
+  }
+
+  .pics {
+    height: 300px;
+    width: 250px;
+  }
+}

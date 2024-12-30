@@ -39,6 +39,7 @@
       ];
     }
     typing = false;
+    chatScroll();
   };
 
   const compresschat = () => {
@@ -74,6 +75,11 @@
     character = JSON.parse(localStorage.getItem("temp_character"));
     ai_role = character.character.split('name = "')[1].split('"')[0];
   });
+
+  const chatScroll = () => {
+    const element = document.querySelector(".chats");
+    element.scrollTop = element.scrollHeight;
+  };
 </script>
 
 <div class="container">
@@ -89,30 +95,32 @@
   </div>
   <div class="chatscreen">
     <div class="chats">
-      {#each messages as message}
-        {#if message.role === "user"}
-          <div class="usermessage">
-            <strong class="username blue">You</strong>
-            <p>
-              {@html converter.makeHtml(message.content)}
-            </p>
-          </div>
-        {:else if message.role === "assistant"}
-          <div class="assistantmessage">
-            <div class="nameplate">
-              <img
-                class="icon"
-                src={`https://image.pollinations.ai/prompt/${encodeURIComponent(character.icon)}?width=250&height=250&nologo=true`}
-              />
-              <strong class="username yellow">{ai_role} </strong>
+      <div>
+        {#each messages as message}
+          {#if message.role === "user"}
+            <div class="usermessage">
+              <strong class="username blue">You</strong>
+              <p>
+                {@html converter.makeHtml(message.content)}
+              </p>
             </div>
-            {@html converter.makeHtml(check_for_image(message.content, true))}
-          </div>
+          {:else if message.role === "assistant"}
+            <div class="assistantmessage">
+              <div class="nameplate">
+                <img
+                  class="icon"
+                  src={`https://image.pollinations.ai/prompt/${encodeURIComponent(character.icon)}?width=250&height=250&nologo=true`}
+                />
+                <strong class="username yellow">{ai_role} </strong>
+              </div>
+              {@html converter.makeHtml(check_for_image(message.content, true))}
+            </div>
+          {/if}
+        {/each}
+        {#if typing}
+          <div style="color:#ccc">Typing...</div>
         {/if}
-      {/each}
-      {#if typing}
-        <div style="color:#ccc">Typing...</div>
-      {/if}
+      </div>
     </div>
     <div class="chatinfo"></div>
   </div>
@@ -130,7 +138,7 @@
       }}
       placeholder="Type your message"
     ></textarea>
-    <button on:click={send}>Send</button>
+    <button class="button" on:click={send}>Send</button>
   </div>
 </div>
 
@@ -218,5 +226,37 @@
     color: #ccc;
     width: fit-content;
     min-width: 100px;
+  }
+  @media (max-width: 600px) {
+    .input {
+      height: 80px;
+    }
+    textarea {
+      height: 80px;
+    }
+    .button {
+      width: 80px;
+      height: 80px;
+      background-color: #242424;
+      padding: 0;
+    }
+    .chatinfo {
+      display: none;
+    }
+    .chatscreen {
+      width: 100vw;
+      overflow-y: scroll;
+    }
+    .chats {
+      width: 100vw;
+      overflow-x: hidden;
+    }
+    .usermessage {
+      margin-bottom: 5px;
+    }
+    .assistantmessage {
+      margin-bottom: 5px;
+      width: calc(100vw - 40px);
+    }
   }
 </style>
