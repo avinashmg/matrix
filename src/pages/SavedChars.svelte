@@ -19,6 +19,7 @@
   {#each saved_characters as character}
     <div class="characters">
       <img
+        class="icon"
         src={`https://image.pollinations.ai/prompt/${encodeURIComponent(character.pic)}?width=250&height=250&nologo=true`}
       />
       <img
@@ -30,7 +31,7 @@
       <button on:click={() => chat_with_char(JSON.stringify(character))}
         >Chat</button
       >
-      <button>Add To Main</button>
+      <!-- <button>Add To Main</button> -->
     </div>
   {/each}
 </div>
@@ -59,5 +60,20 @@
     font-weight: bold;
     color: #ccc;
     flex-grow: 1;
+  }
+  @media (max-width: 600px) {
+    .characters > img {
+      height: 50px;
+      width: 50px;
+    }
+    .name {
+      font-size: medium;
+    }
+    .icon {
+      display: none;
+    }
+    button {
+      padding: 5px;
+    }
   }
 </style>
